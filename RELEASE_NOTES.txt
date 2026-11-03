@@ -1,5 +1,1 @@
-v4.0.12 beta
-- 15個の人物候補（既存イラスト12・公式素材登録枠3）
-- 公式サイトの画像を端末上で登録・削除
-- GitHub配布物に著作権素材を含めない構成
-- 既存の学習・発音・採点処理は変更なし
+v4.0.13 beta: avatar icons on model/pronunciation buttons; listening contrast pulse; transient stop status; silent stop = not recognized; warning/error red.

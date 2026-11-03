@@ -32,3 +32,24 @@ test('licensed slots are local-only',()=>{assert.ok(html.includes('uploadLicense
 test('all 15 avatar choices',()=>{assert.strictEqual(vm.runInContext('AVATAR_CHOICES.length',context),15)});
 test('official images missing cannot be selected',()=>{assert.ok(vm.runInContext("avatarOptions('coachAvatar','Coach')",context).includes('disabled'))});
 console.log(JSON.stringify({tests:pass.length,passed:pass,failed:process.exitCode||0},null,2));
+
+// v4.0.13 regression: button avatars / visual state / silent manual stop and transient status.
+test('v413 avatar buttons in pronunciation and example',()=>{
+ for(const page of ['pron','example','conversation']){
+  vm.runInContext(`state.page=${JSON.stringify(page)};render()`,context);
+  const screen=el('app').innerHTML;
+  assert.ok(screen.includes('btn-avatar'),page+' should have embedded avatar');
+  assert.ok(screen.includes('mic-button-label'),page+' should have label that can change without deleting avatar');
+ }
+});
+test('v413 no-speech and warning visual styling',()=>{
+ assert.ok(html.includes('聞き取れませんでした'));
+ assert.ok(html.includes('temporaryVoiceNote(wasSilent?'));
+ assert.ok(html.includes('.voice-inline.is-warning'));
+ assert.ok(html.includes('@keyframes v413ListeningPulse'));
+});
+test('v413 user stop does not enter result screen',()=>{
+ vm.runInContext("state.page='pron';render();listen('chunk');finishListening()",context);
+ assert.strictEqual(vm.runInContext('state.page',context),'pron');
+});
+console.log('v4.0.13 additional tests complete');
