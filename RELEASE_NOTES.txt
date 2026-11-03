@@ -1,6 +1,6 @@
-v4.0.4 beta
-- Strongly highlight active pronunciation/example/AI mode.
-- Rename scene selector.
-- Pair each scene prompt with an answer centered on the current chunk, including slot replacements. Offline rule-based only; AI generation not connected.
-- Add 10 selectable portraits (AI1/2, male1-4, female1-4) while retaining legacy avatar choices in storage.
-- Preserve v3.9.8 separate repository/cache.
+v4.0.5 beta
+- Nonselected learning tabs: white fill with outline only.
+- Fixed chunk pager separated from mode bar using coordinated row heights and gap.
+- Scene question Japanese translations use corresponding Japanese scene vocabulary.
+- Existing learning data, voice UI and avatars retained.
+- Automated static checks passed; iPhone runtime still requires verification.
