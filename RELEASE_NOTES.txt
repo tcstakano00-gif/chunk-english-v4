@@ -1,0 +1,7 @@
+v4.0.0 beta - 2026-11-03
+Base: v3.9.8, preserved in original ZIP.
+Pronunciation: removed example and scene practice from dedicated view.
+Examples: question/answer stacked, compact buttons and collapsed examples.
+Conversation: removed role controls from screen; shows question/answer with current preset templates, NOT true AI generation.
+Existing speech recognition, progress, settings and backup systems retained.
+Not yet verified on real mobile devices; AI generation/backend not implemented.
