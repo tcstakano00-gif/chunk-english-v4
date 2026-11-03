@@ -1,7 +1,6 @@
-v4.0.0 beta - 2026-11-03
-Base: v3.9.8, preserved in original ZIP.
-Pronunciation: removed example and scene practice from dedicated view.
-Examples: question/answer stacked, compact buttons and collapsed examples.
-Conversation: removed role controls from screen; shows question/answer with current preset templates, NOT true AI generation.
-Existing speech recognition, progress, settings and backup systems retained.
-Not yet verified on real mobile devices; AI generation/backend not implemented.
+v4.0.4 beta
+- Strongly highlight active pronunciation/example/AI mode.
+- Rename scene selector.
+- Pair each scene prompt with an answer centered on the current chunk, including slot replacements. Offline rule-based only; AI generation not connected.
+- Add 10 selectable portraits (AI1/2, male1-4, female1-4) while retaining legacy avatar choices in storage.
+- Preserve v3.9.8 separate repository/cache.
