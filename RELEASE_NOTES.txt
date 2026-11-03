@@ -1,1 +1,1 @@
-v4.0.13 beta: avatar icons on model/pronunciation buttons; listening contrast pulse; transient stop status; silent stop = not recognized; warning/error red.
+v4.0.14 β: 写真風の独自生成人物6種類を追加し、人物選択を15枠（イラスト6・リアル6・公式素材登録3）へ整理。以前の選択設定は維持。
