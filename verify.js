@@ -16,4 +16,19 @@ for(const [kind,page] of [['chunk','pron'],['exampleQuestion','example'],['examp
 test('speech success '+kind,()=>{vm.runInContext(`state.page=${JSON.stringify(page)};render();listen(${JSON.stringify(kind)})`,context);const r=win.__rec;const target=vm.runInContext(`target(${JSON.stringify(kind)})`,context);const item=[{transcript:target}];item.isFinal=true;r.onresult({results:[item]});r.onend();assert.strictEqual(vm.runInContext('state.page',context),'results');assert.ok(el('app').innerHTML.includes('result-card'))});
 test('manual cancel '+kind,()=>{vm.runInContext(`state.page=${JSON.stringify(page)};render();listen(${JSON.stringify(kind)});finishListening()`,context);assert.strictEqual(vm.runInContext('state.page',context),page)})
 }
+// Static navigation geometry invariants (CSS variables and safe-area retained).
+test('compact fixed navigation layout',()=>{
+  const match=html.match(/\/\* v4\.0\.12:[\s\S]*?<\/style>/);
+  assert.ok(match,'v4.0.12 CSS not found');
+  const css=match[0];
+  const val=k=>Number(css.match(new RegExp(k+':(\\d+)px'))?.[1]);
+  assert.strictEqual(val('--nav-gap'),2);
+  assert.strictEqual(val('--mode-nav-height'),48);
+  assert.strictEqual(val('--chunk-nav-height'),42);
+  assert.ok(val('--bottom-nav-height')>=58);
+  assert.ok(css.includes('env(safe-area-inset-bottom)'));
+});
+test('licensed slots are local-only',()=>{assert.ok(html.includes('uploadLicensedAvatar'));assert.ok(html.includes('licensedImage3'));assert.ok(!html.includes('人物候補.jpg'))});
+test('all 15 avatar choices',()=>{assert.strictEqual(vm.runInContext('AVATAR_CHOICES.length',context),15)});
+test('official images missing cannot be selected',()=>{assert.ok(vm.runInContext("avatarOptions('coachAvatar','Coach')",context).includes('disabled'))});
 console.log(JSON.stringify({tests:pass.length,passed:pass,failed:process.exitCode||0},null,2));
