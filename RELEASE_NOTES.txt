@@ -1,6 +1,7 @@
-v4.0.5 beta
-- Nonselected learning tabs: white fill with outline only.
-- Fixed chunk pager separated from mode bar using coordinated row heights and gap.
-- Scene question Japanese translations use corresponding Japanese scene vocabulary.
-- Existing learning data, voice UI and avatars retained.
-- Automated static checks passed; iPhone runtime still requires verification.
+v4.0.6 β
+- A方式：例文学習のシーン選択を廃止
+- 100チャンクの登録済み質問と例文回答を使用
+- 前/次の例文と一覧選択を同期
+- AI会話のみシーン選択を維持（AI自動生成は未実装）
+- 既存の採点・発音・学習履歴機能を保持
+- iPhone実機での全機能検証は未実施
