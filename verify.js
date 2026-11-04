@@ -53,3 +53,38 @@ test('v413 user stop does not enter result screen',()=>{
  assert.strictEqual(vm.runInContext('state.page',context),'pron');
 });
 console.log('v4.0.13 additional tests complete');
+
+// v4.0.15: all six photo avatars must survive settings reload sanitization.
+for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','foreignfemale']){
+ test('v415 persisted avatar '+id,()=>{
+  const value=vm.runInContext(`cleanSettings({coachAvatar:${JSON.stringify(id)},aiAvatar:${JSON.stringify(id)},youAvatar:${JSON.stringify(id)}})`,context);
+  assert.strictEqual(value.coachAvatar,id);assert.strictEqual(value.aiAvatar,id);assert.strictEqual(value.youAvatar,id);
+  const url=vm.runInContext(`avatarSrc(${JSON.stringify(id)},'customCoach')`,context);
+  assert.ok(url.endsWith('.webp?v=416'),'URL should be versioned WebP: '+url);
+ });
+}
+test('v415 SW cache isolated and refreshed',()=>{
+ const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
+ assert.ok(sw.includes('chunk-english-v4-0-16'));
+ assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
+ assert.ok(html.includes('./sw.js?v=416'));
+});
+console.log('v4.0.15 total passed:',pass.length,'failed:',process.exitCode||0);
+
+// v416: ensure 6 smaller portraits and visually distinct mic active state.
+test('v416 all six portraits optimized',()=>{
+ const {statSync}=fs;const path=require('path');
+ const names=['ai-female','ai-male','japanese-male','japanese-female','foreign-male','foreign-female'];
+ for(const name of names){
+  const image=path.join(__dirname,`portrait-v416-${name}.webp`);
+  assert.ok(statSync(image).size < 10000, 'portrait >10KB: '+name);
+  assert.ok(html.includes(`./portrait-v416-${name}.webp?v=416`));
+ }
+});
+test('v416 listening color pulse remains visible when disabled',()=>{
+ assert.ok(html.includes('v416MicListening'));
+ assert.ok(html.includes('[data-mic-button].mic-active:disabled'));
+ assert.ok(html.includes('background-color:#c4d5e7'));
+ assert.ok(html.includes('background-color:#176bd0'));
+});
+console.log('v4.0.16 additional tests done');
