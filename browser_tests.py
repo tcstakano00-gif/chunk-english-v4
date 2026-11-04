@@ -1,0 +1,130 @@
+"""Deterministic Chromium regression suite for Chunk English v4.0.21.
+Actual microphone recognition on iOS needs on-device testing.
+"""
+from playwright.sync_api import sync_playwright
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from functools import partial
+from threading import Thread
+from pathlib import Path
+import json
+
+ROOT=Path(__file__).parent
+class Quiet(SimpleHTTPRequestHandler):
+    def log_message(self,*args): pass
+
+def run():
+    server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(ROOT)))
+    th=Thread(target=server.serve_forever,daemon=True);th.start()
+    url=f'http://127.0.0.1:{server.server_port}/'
+    outcomes=[]
+    def check(label,func):
+        try:func();outcomes.append((label,'PASS'))
+        except Exception as e:outcomes.append((label,'FAIL '+str(e)[:280]))
+    with sync_playwright() as p:
+        browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+        ctx=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,device_scale_factor=2,has_touch=True)
+        page=ctx.new_page()
+        errors=[]
+        page.on('pageerror',lambda e:errors.append(str(e)))
+        MOCK_SCRIPT="""
+          window.__speechInstances=[];
+          class MockSpeechRecognition {
+            constructor(){this.lang='';this.continuous=false;this.interimResults=false;window.__speechInstances.push(this)}
+            start(){this.onstart?.({})}
+            stop(){this.onend?.({})}
+            abort(){this.aborted=true}
+            result(text,final=true){const r=[{transcript:text,confidence:0.94}];r.isFinal=final;this.onresult?.({results:[r]})}
+            error(code){this.onerror?.({error:code})}
+          }
+          window.SpeechRecognition=MockSpeechRecognition;
+          window.webkitSpeechRecognition=MockSpeechRecognition;
+        """
+        page.set_content(ROOT.joinpath('index.html').read_text(encoding='utf-8'),wait_until='domcontentloaded')
+        page.evaluate("() => {"+MOCK_SCRIPT+"}")
+        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.21')))
+        check('all three modes render',lambda: [page.evaluate("(m)=>go(m)",m) for m in ['pron','example','conversation']])
+        check('question and reply buttons separate',lambda: assert_true(page.locator('[data-mic-button]').count()==2))
+        def speech(page_id,kind,expected):
+            page.evaluate('(v)=>go(v)',page_id)
+            page.locator(f'[data-mic-kind="{kind}"]').click()
+            page.evaluate('([kind])=>{const r=window.__speechInstances.at(-1);r.result(target(kind));r.onend?.({})}',[kind])
+            page.wait_for_function("state.page==='results'",timeout=2000)
+            assert page.locator('.result-card').count()==1
+            assert page.evaluate('state.latest.kind')==kind
+            page.locator('.resultActions button').first.click()
+            assert page.evaluate('state.page')==expected
+        for pg,kind in [('pron','chunk'),('example','exampleQuestion'),('example','example'),('conversation','question'),('conversation','reply')]:
+            check('speech score and back '+kind,lambda pg=pg,kind=kind:speech(pg,kind,pg))
+        def error(kind,code):
+            page.evaluate('(v)=>go(v)', 'example' if kind.startswith('example') else 'conversation' if kind in ('question','reply') else 'pron')
+            btn=page.locator(f'[data-mic-kind="{kind}"]');btn.click()
+            assert 'mic-active' in btn.get_attribute('class')
+            page.evaluate('(v)=>window.__speechInstances.at(-1).error(v)',code)
+            assert 'mic-active' not in btn.get_attribute('class')
+            assert btn.is_enabled()
+            assert page.locator('#voiceNote').count()==1
+            assert page.locator('#voiceNote').get_attribute('class').find('is-warning')>=0
+            assert page.evaluate('state.page')!='results'
+        for k in ('chunk','exampleQuestion','example','question','reply'):
+            check('network error recovery '+k,lambda k=k:error(k,'network'))
+        def manual():
+            page.evaluate("go('example')")
+            page.locator('[data-mic-kind="example"]').click()
+            page.locator('.v4-qa').nth(1).locator('button').last.click()
+            assert page.evaluate('state.page')=='example'
+            assert page.locator('[data-mic-kind="example"]').is_enabled()
+            assert 'mic-active' not in (page.locator('[data-mic-kind="example"]').get_attribute('class') or '')
+        check('manual microphone cancel',manual)
+        def single():
+            page.evaluate("go('conversation')")
+            first=page.locator('[data-mic-kind="question"]')
+            other=page.locator('[data-mic-kind="reply"]')
+            first.click()
+            assert 'mic-active' in first.get_attribute('class')
+            assert 'mic-active' not in other.get_attribute('class')
+            page.evaluate('finishListening()')
+        check('single mic activity',single)
+        def diag():
+            data=page.evaluate('speechDiagnostics.map(x=>({event:x.event,kind:x.kind,detail:x.detail}))')
+            assert len(data)>0
+            assert all(set(row)<=set(('event','kind','detail')) for row in data)
+            assert not any('Sounds good' in json.dumps(row) for row in data)
+        check('speech diagnostic metadata contains no transcript',diag)
+        def expired():
+            page.evaluate("go('pron')")
+            page.locator('[data-mic-kind="chunk"]').click()
+            page.evaluate("window.__speechInstances.at(-1).error('no-speech')")
+            assert page.locator('#voiceNote').inner_text()
+            page.wait_for_timeout(4600)
+            assert page.locator('#voiceNote').inner_text()==''
+            assert page.locator('[data-mic-kind="chunk"]').is_enabled()
+        check('warning expires and button returns idle',expired)
+
+        def settings():
+            page.evaluate("go('settings')")
+            page.locator('select').first.select_option('1.12')
+            page.evaluate("go('pron')")
+            page.evaluate("go('settings')")
+            assert page.locator('select').first.input_value()=='1.12'
+        check('settings persist across screen transitions',settings)
+        def layout():
+            page.evaluate("go('conversation')")
+            return page.evaluate("""() => {
+                const a=document.querySelector('#fixedChunkPager'), b=document.querySelector('.modebar'), c=document.querySelector('.footer');
+                const r=x=>x?x.getBoundingClientRect():null;
+                return {pager:r(a),mode:r(b),footer:r(c),screen:innerHeight};
+            }""")
+        info={}
+        def capture():info.update(layout())
+        check('layout inspected',capture)
+        check('no uncaught browser errors',lambda: assert_true(not errors,'; '.join(errors)))
+        browser.close()
+    server.shutdown()
+    print(json.dumps({'total':len(outcomes),'passed':sum(s=='PASS' for _,s in outcomes),'tests':outcomes,'layout':info,'browserErrors':errors},ensure_ascii=False,indent=2))
+    return not any(s!='PASS' for _,s in outcomes)
+
+def assert_true(val,msg='assertion failed'):
+    if not val:raise AssertionError(msg)
+
+if __name__=='__main__':
+    raise SystemExit(0 if run() else 1)

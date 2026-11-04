@@ -65,9 +65,9 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-17'));
+ assert.ok(sw.includes('chunk-english-v4-0-21'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
- assert.ok(html.includes('./sw.js?v=416'));
+ assert.ok(html.includes('./sw.js?v=421'));
 });
 console.log('v4.0.15 total passed:',pass.length,'failed:',process.exitCode||0);
 
@@ -87,4 +87,79 @@ test('v416 listening color pulse remains visible when disabled',()=>{
  assert.ok(html.includes('background-color:#c4d5e7'));
  assert.ok(html.includes('background-color:#176bd0'));
 });
-console.log('v4.0.17 additional tests done');
+console.log('v4.0.21 legacy tests done');
+
+// v4.0.20: actual DOM-like button state must be restored for every terminal outcome.
+let activeState=false;
+const label={textContent:'発音',dataset:{}};
+const micButton={dataset:{micKind:'chunk'},disabled:false,style:{removeProperty(){}},classList:{toggle(_cls,on){activeState=on},remove(){activeState=false}},setAttribute(){},removeAttribute(){},querySelector(sel){return sel==='.mic-button-label'?label:null}};
+doc.querySelectorAll=(selector)=>selector==='[data-mic-button]'?[micButton]:[];
+for(const error of ['network','audio-capture','no-speech','not-allowed','aborted']){
+ test('v418 error restores microphone '+error,()=>{
+  vm.runInContext("state.page='pron';render();listen('chunk')",context);
+  assert.strictEqual(micButton.disabled,true,'listening should lock the microphone');
+  win.__rec.onerror({error});
+  assert.strictEqual(micButton.disabled,false,'error must enable microphone');
+  assert.strictEqual(activeState,false,'error must stop animation');
+  assert.strictEqual(label.textContent,'発音','error must restore label');
+ });
+}
+test('v418 normal success restores microphone',()=>{
+ vm.runInContext("state.page='pron';render();listen('chunk')",context);
+ const r=win.__rec;const item=[{transcript:'Sounds good.'}];item.isFinal=true;
+ r.onresult({results:[item]});r.onend();
+ assert.strictEqual(micButton.disabled,false);
+ assert.strictEqual(activeState,false);
+});
+test('v418 manual cancel restores microphone',()=>{
+ vm.runInContext("state.page='pron';render();listen('chunk');finishListening()",context);
+ assert.strictEqual(micButton.disabled,false);
+ assert.strictEqual(activeState,false);
+});
+// v4.0.20 regression: question and answer have separate listening indicators.
+function fakeMic(kind){
+ const t={textContent:'発音',dataset:{}};
+ const classes=new Set();
+ return {dataset:{micKind:kind},disabled:false,style:{removeProperty(){}},
+  classList:{toggle(c,on){if(on)classes.add(c);else classes.delete(c)},remove(c){classes.delete(c)},contains(c){return classes.has(c)}},
+  setAttribute(){},removeAttribute(){},querySelector(sel){return sel==='.mic-button-label'?t:null},label:t};
+}
+const qButton=fakeMic('question'),aButton=fakeMic('reply');
+const eqButton=fakeMic('exampleQuestion'),eaButton=fakeMic('example');
+function assertSingleActive(active,other){
+ assert.ok(active.classList.contains('mic-active'),'pressed button must pulse');
+ assert.strictEqual(active.label.textContent,'聞き取り中…');
+ assert.ok(!other.classList.contains('mic-active'),'other button must not pulse');
+ assert.strictEqual(other.label.textContent,'発音');
+ assert.strictEqual(other.disabled,false,'other button must not be dimmed');
+}
+for(const [page,pressed,other,kind] of [
+ ['conversation',qButton,aButton,'question'],['conversation',aButton,qButton,'reply'],
+ ['example',eqButton,eaButton,'exampleQuestion'],['example',eaButton,eqButton,'example']]){
+ test('v419 one listening button '+kind,()=>{
+  const pair=page==='conversation'?[qButton,aButton]:[eqButton,eaButton];
+  doc.querySelectorAll=(selector)=>selector==='[data-mic-button]'?pair:[];
+  vm.runInContext(`state.page=${JSON.stringify(page)};render();listen(${JSON.stringify(kind)})`,context);
+  assertSingleActive(pressed,other);
+  vm.runInContext('finishListening()',context);
+  assert.ok(!pressed.classList.contains('mic-active'));
+  assert.strictEqual(pressed.label.textContent,'発音');
+  assert.strictEqual(pressed.disabled,false);
+ });
+}
+console.log('v4.0.20 tests executed; failed:',process.exitCode||0);
+
+// v4.0.20: every scene-dependent answer must have a completed Japanese meaning.
+for(const scene of ['daily','travel','shopping','restaurant']){
+ test('v420 100 chunk answer translations '+scene,()=>{
+  const rows=vm.runInContext(`CHUNKS.slice(0,100).map(x=>({id:x.id,en:sceneChunkAnswer(x,${JSON.stringify(scene)})[0],ja:sceneChunkAnswer(x,${JSON.stringify(scene)})[1]}))`,context);
+  assert.strictEqual(rows.length,100);
+  for(const row of rows){
+   assert.ok(row.ja.trim(),'empty translation at '+row.id);
+   if(!row.en.includes('～'))assert.ok(!row.ja.includes('～'),'unfilled Japanese at '+row.id+': '+row.en+' / '+row.ja);
+  }
+  const example=rows.find(x=>x.id===63);assert.ok(example.ja.includes('のはどうですか'),'scene 63 needs an explicit action');
+  assert.ok(!example.ja.includes('～'));
+ });
+}
+console.log('v4.0.20 translation regression tests:',pass.length,'errors:',process.exitCode||0);
