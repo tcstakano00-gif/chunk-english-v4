@@ -1,7 +1,7 @@
-# v4.0.21 β テスト手順
+# v4.0.22 β 検証方法
 
-- `node verify.js` : モック画面、採点への戻り先、認識後の遷移、手動中断・無音・エラー、人物設定、100チャンク×4シーンの和訳形式など（56件）。
-- `python browser_tests.py` : Playwright + Chromium による実画面のクリックとDOM検証、音声認識APIの模擬（20件）。
-- iOS Safari、ホーム画面PWA、Androidは実機で音声/マイク権限を確認する必要があります。
+`python quality_lab/run_suite.py` でWAV波形・JavaScript・Chromium UIテストを実行します。実行結果は `quality_lab/suite-report.json` に記録されます。
 
-詳細な実施結果と公開前の残課題は QUALITY_REPORT.md を参照してください。
+`quality_lab/README.md` に音声条件、権利、動作条件、iPhone実機テストの限界を記載しました。
+
+Web Speech APIは通常のブラウザー環境ではWAV直接入力に対応していません。この版ではWAVが実際に英文として認識されたことを検証していません。
