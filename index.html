@@ -442,7 +442,7 @@ function beginReview(){
  state.lastReviewId=selected.id;state.id=selected.id;state.variant=0;state.answer=0;
  go('pron');
 }
-function render(){let x=item(),v=selected();let out='';if(state.page==='home'){out=`${header('ホーム')}<div class="hero card"><div style="flex:1;min-width:0"><div class="app-title-line"><h1>チャンク英会話</h1><span class="app-version" aria-label="アプリバージョン">v4.0.17 β</span></div><p>チャンクとは、会話でよく使う短い言葉のまとまりです。まとめて覚えると、自然に英語が話しやすくなります。</p></div><div class="people"><div class="person coach" aria-label="AIコーチ"></div><div class="person learner" aria-label="学習者"></div></div></div><div class="modes"><button class="mode" onclick="go('pron')"><span class="mode-icon">🎙</span><span><b>発音で学習</b><small>チャンクを聞いて発音練習</small></span><span class="go">›</span></button><button class="mode green" onclick="go('example')"><span class="mode-icon">▤</span><span><b>例文で学習</b><small>同じ表現を例文で練習</small></span><span class="go">›</span></button><button class="mode orange" onclick="go('conversation')"><span class="mode-icon">☏</span><span><b>AI会話で学習</b><small>引き継いだ表現で会話練習</small></span><span class="go">›</span></button></div><div class="card review-entry"><div class="review-head"><b>苦手チャンクの復習</b><span class="tiny">低スコア・未復習を優先</span></div><button class="btn green full" onclick="beginReview()">↻ おすすめチャンクを練習</button><div class="tiny review-legend">未学習 → 練習中 → 習得済み（85%以上を別の日に2回）</div></div><div class="subgrid"><div class="mini-card"><span class="label">現在のチャンク</span><div style="font-weight:800">No.${x.id}</div><div style="font-size:16px;font-weight:800;margin-top:4px">${esc(x.en)}</div><div class="tiny">${esc(x.ja)}</div></div><div class="mini-card"><span class="label">選択中の例文</span><div style="font-size:14px;font-weight:800">${esc(v[0])}</div><div class="tiny">${esc(v[1])}</div></div></div><div class="card"><button class="btn outline full" onclick="go('list')">学習するチャンクを変更</button><details class="notice-toggle"><summary>現在利用できる機能について</summary><div class="notice">3モード・読み上げ・通常発音チェックを利用できます。録音・聞き比べは一時停止中です。録音を用いたAI精密採点とAI自由会話には別のサーバーが必要です。</div></details></div>`}
+function render(){let x=item(),v=selected();let out='';if(state.page==='home'){out=`${header('ホーム')}<div class="hero card"><div style="flex:1;min-width:0"><div class="app-title-line"><h1>チャンク英会話</h1><span class="app-version" aria-label="アプリバージョン">v4.0.18 β</span></div><p>チャンクとは、会話でよく使う短い言葉のまとまりです。まとめて覚えると、自然に英語が話しやすくなります。</p></div><div class="people"><div class="person coach" aria-label="AIコーチ"></div><div class="person learner" aria-label="学習者"></div></div></div><div class="modes"><button class="mode" onclick="go('pron')"><span class="mode-icon">🎙</span><span><b>発音で学習</b><small>チャンクを聞いて発音練習</small></span><span class="go">›</span></button><button class="mode green" onclick="go('example')"><span class="mode-icon">▤</span><span><b>例文で学習</b><small>同じ表現を例文で練習</small></span><span class="go">›</span></button><button class="mode orange" onclick="go('conversation')"><span class="mode-icon">☏</span><span><b>AI会話で学習</b><small>引き継いだ表現で会話練習</small></span><span class="go">›</span></button></div><div class="card review-entry"><div class="review-head"><b>苦手チャンクの復習</b><span class="tiny">低スコア・未復習を優先</span></div><button class="btn green full" onclick="beginReview()">↻ おすすめチャンクを練習</button><div class="tiny review-legend">未学習 → 練習中 → 習得済み（85%以上を別の日に2回）</div></div><div class="subgrid"><div class="mini-card"><span class="label">現在のチャンク</span><div style="font-weight:800">No.${x.id}</div><div style="font-size:16px;font-weight:800;margin-top:4px">${esc(x.en)}</div><div class="tiny">${esc(x.ja)}</div></div><div class="mini-card"><span class="label">選択中の例文</span><div style="font-size:14px;font-weight:800">${esc(v[0])}</div><div class="tiny">${esc(v[1])}</div></div></div><div class="card"><button class="btn outline full" onclick="go('list')">学習するチャンクを変更</button><details class="notice-toggle"><summary>現在利用できる機能について</summary><div class="notice">3モード・読み上げ・通常発音チェックを利用できます。録音・聞き比べは一時停止中です。録音を用いたAI精密採点とAI自由会話には別のサーバーが必要です。</div></details></div>`}
 else if(state.page==='pron'){out=header('発音で学習')+nav()+`<div class="card v4-screen v4-pron"><div class="compactMeta"><div class="step">チャンク ${CHUNKS.findIndex(c=>c.id===x.id)+1} / ${CHUNKS.length}</div><div class="pill">発音集中</div></div><div class="v4-chunk">${contentBox(x.en,x.ja)}</div><div class="v4-primary"><button class="btn gray" onclick="speak('chunk')"><span class="avatar teacher btn-avatar" aria-hidden="true"></span><span>お手本</span></button><button class="btn" data-mic-button onclick="listen('chunk')"><span class="avatar student btn-avatar" aria-hidden="true"></span><span class="mic-button-label">発音する</span></button></div><div class="v4-secondary"><button class="btn outline" onclick="go('results')">👤 発音コーチ・採点</button><button class="btn outline" onclick="finishListening()">■ マイク停止</button></div><div id="voiceNote" class="tiny voice-inline" aria-live="polite"></div><div id="transcript" class="tiny" aria-live="polite"></div>${state.latest?`<button class="btn outline full" onclick="go('results')">採点・添削を見る</button>`:''}<p class="tiny">選択中のチャンクは例文学習・AI会話にも引き継がれます。</p>${linkBar()}</div>`}
 else if(state.page==='example'){let qa=examplePair(x);out=header('例文で学習')+nav()+`<div class="card v4-screen"><div class="v4-meta"><span>チャンク：<b>${esc(x.en)}</b></span><span>例文 ${state.variant+1} / ${examples(x).length}</span></div>${qaCard('質問',qa.question,'exampleQuestion')}${qaCard('回答',qa.answer,'example')}<div class="v4-switch"><button class="btn outline compact" onclick="chooseAnswerForExample(-1)">‹ 前の例文</button><button class="btn gray compact" onclick="chooseAnswerForExample(1)">次の例文 ›</button></div><details class="v4-choices"><summary>登録済みの回答例を一覧から選ぶ</summary><div class="list exlist">${examples(x).map((a,i)=>`<button class="choice ${i===state.variant?'selected':''}" onclick="chooseRegisteredVariant(${i})">${esc(a[0])}<small>${esc(a[1])}</small></button>`).join('')}</div></details><div id="voiceNote" class="tiny voice-inline" aria-live="polite"></div><div id="transcript" class="tiny"></div>${state.latest?`<button class="btn outline full" onclick="go('results')">採点・添削を見る</button>`:''}${linkBar()}</div>`}
 else if(state.page==='conversation'){let qa=conversationPair(x);out=header('AI会話で学習')+nav()+`<div class="card v4-screen"><div class="v4-meta"><span>チャンク：<b>${esc(x.en)}</b></span><span>質問・回答練習</span></div>${sceneChooser()}<p class="tiny v4-ai-note">シーンに応じた定型文による試作です。AI生成は未接続のため、チャンクとシーンが合わない場合があります。</p>${qaCard('質問',qa.question,'question',true)}${qaCard('回答例',qa.answer,'reply',true)}<div class="v4-switch"><button class="btn gray compact" onclick="chooseAnswer((state.answer+1)%scenario(item()).choices.length)">別の回答例</button><button class="btn outline compact" onclick="go('results')">発音コーチ・採点</button></div><div id="voiceNote" class="tiny voice-inline" aria-live="polite"></div><div id="transcript" class="tiny"></div>${state.latest?`<button class="btn outline full" onclick="go('results')">採点・添削を見る</button>`:''}${linkBar()}</div>`}
@@ -754,6 +754,19 @@ function target(kind){let x=item(),v=selected(),s=scenario(x);return kind==='chu
  });
  const n=$('voiceNote');if(n&&active)setVoiceNote('● 聞き取り中です。英文を話してください。');
 }
+// Restore idle controls after error, timeout or a completed recognition session.
+function restoreMicButtonIdle(){
+ setMicIndicator(false);
+ document.querySelectorAll('[data-mic-button]').forEach(b=>{
+  b.disabled=false;
+  b.classList.remove('mic-active');
+  b.removeAttribute('aria-disabled');
+  b.style.removeProperty('opacity');
+  b.style.removeProperty('filter');
+  b.style.removeProperty('animation');
+  b.style.removeProperty('background-color');
+ });
+}
 function stop(){resetSpeechRecognition()}
 let statusClearTimer=null,statusClearSequence=0;
 let recognitionHasAudio=false;
@@ -768,6 +781,7 @@ function temporaryVoiceNote(message,warning=false,delay=2500){
  statusClearTimer=setTimeout(()=>{
   if(sequence!==statusClearSequence||rec||audioPhase==='preparing'||audioPhase==='listening')return;
   setVoiceNote('');
+  restoreMicButtonIdle();
   statusClearTimer=null;
  },delay);
 }
@@ -813,9 +827,8 @@ function resetSpeechRecognition(){
  if(recognitionTimeout){clearTimeout(recognitionTimeout);recognitionTimeout=null}
  const old=rec;rec=null;
  if(old){old.onresult=null;old.onerror=null;old.onend=null;old.onspeechstart=null;old.onspeechend=null;try{old.abort()}catch{}}
- setMicIndicator(false);
+ restoreMicButtonIdle();
  if(audioPhase==='preparing'||audioPhase==='listening')audioPhase='idle';
- document.querySelectorAll('[data-mic-button]').forEach(b=>{b.disabled=false});
 }
 function listen(kind){
  // v4.0.7: WebKitでonresultの後にonendが届かない場合でも最終結果を採点へ送る。
@@ -852,7 +865,7 @@ function listen(kind){
  }
  function finishResult(){
   if(!valid())return;
-  completed=true;clearTimers();rec=null;audioPhase='idle';setMicIndicator(false);
+  completed=true;clearTimers();rec=null;audioPhase='idle';restoreMicButtonIdle();
   r.onresult=null;r.onerror=null;r.onend=null;r.onspeechstart=null;r.onspeechend=null;
   if(!heard){
    temporaryVoiceNote('聞き取れませんでした',true,3000);
@@ -867,7 +880,7 @@ function listen(kind){
  }
  function showError(message){
   if(!valid())return;
-  completed=true;clearTimers();rec=null;audioPhase='idle';setMicIndicator(false);
+  completed=true;clearTimers();rec=null;audioPhase='idle';restoreMicButtonIdle();
   r.onresult=null;r.onerror=null;r.onend=null;r.onspeechstart=null;r.onspeechend=null;
   state.recognitionError=message;
   // 中断・無音はエラー画面に送らない。
