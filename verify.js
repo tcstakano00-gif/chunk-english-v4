@@ -65,7 +65,7 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-16'));
+ assert.ok(sw.includes('chunk-english-v4-0-17'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
  assert.ok(html.includes('./sw.js?v=416'));
 });
@@ -87,4 +87,4 @@ test('v416 listening color pulse remains visible when disabled',()=>{
  assert.ok(html.includes('background-color:#c4d5e7'));
  assert.ok(html.includes('background-color:#176bd0'));
 });
-console.log('v4.0.16 additional tests done');
+console.log('v4.0.17 additional tests done');
