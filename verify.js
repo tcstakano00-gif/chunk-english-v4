@@ -65,9 +65,9 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-24'));
+ assert.ok(sw.includes('chunk-english-v4-0-25'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
- assert.ok(html.includes('./sw.js?v=424'));
+ assert.ok(html.includes('./sw.js?v=425'));
 });
 console.log('v4.0.15 total passed:',pass.length,'failed:',process.exitCode||0);
 
@@ -194,3 +194,28 @@ test('v424 15 by 15 by 15 avatar selection combinations',()=>{
  assert.strictEqual(summary,3375);
 });
 console.log('v4.0.24 extended tests executed, failures:',process.exitCode||0);
+// v4.0.25: new user-facing features without changing the speech-session implementation.
+test('v425 native TTS voice selector and preview',()=>{
+ assert.ok(html.includes('function englishVoices()'));
+ assert.ok(html.includes('function previewStudyVoice()'));
+ assert.ok(html.includes('voiceURI'));
+ assert.ok(html.includes("speakText(target(kind))"));
+});
+test('v425 AI1 and AI2 original robot assets',()=>{
+ assert.ok(html.includes('person-ai1-v425.png'));
+ assert.ok(html.includes('person-ai2-v425.png'));
+ for(const name of ['person-ai1-v425.png','person-ai2-v425.png'])assert.ok(fs.statSync(require('path').join(__dirname,name)).size>1000);
+});
+test('v425 PWA title and icon assets',()=>{
+ const manifest=JSON.parse(fs.readFileSync(require('path').join(__dirname,'manifest.webmanifest'),'utf8'));
+ assert.strictEqual(manifest.short_name,'チャンク英語学習');
+ for(const name of ['app-icon-192.png','app-icon-512.png','apple-touch-icon.png'])assert.ok(fs.statSync(require('path').join(__dirname,name)).size>1000);
+ assert.ok(html.includes('apple-touch-icon.png?v=425'));
+});
+test('v425 reply-context adjustments',()=>{
+ for(const id of [63,71,72,73,74,75,76,77,78,79,80]){
+  const qs=vm.runInContext(`(function(){const savedMode=sceneMode;sceneMode='travel';const res=scenePairs(CHUNKS.find(x=>x.id===${id}));sceneMode=savedMode;return res.question})()`,context);
+  assert.ok(qs[0].length>8&&qs[1].length>4, 'missing pair '+id);
+ }
+});
+console.log('v4.0.25 features verified');
