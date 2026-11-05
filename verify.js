@@ -65,7 +65,7 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-26'));
+ assert.ok(sw.includes('chunk-english-v4-0-27'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
  assert.ok(html.includes('./sw.js?v=426'));
 });
@@ -220,15 +220,21 @@ test('v425 reply-context adjustments',()=>{
 });
 console.log('v4.0.25 features verified');
 
-// v4.0.26: selected avatars displayed independently from the curated voice choices.
-test('v426 capped curated distinct voice candidates and avatars',()=>{
- assert.ok(html.includes('function studyVoiceCandidates()'));
- assert.ok(html.includes('chosen.slice(0,5)'));
- assert.ok(html.includes('used.has(v.voiceURI)'));
- assert.ok(html.includes('VOICE_EXCLUDE'));
+// v4.0.27: the 20 study styles are selectable independently of avatar art.
+test('v427 20 profile variations, avatar independence, and tune bounds',()=>{
+ assert.ok(html.includes('function voicePicker()'));
  assert.ok(html.includes('study-voice-avatars'));
  assert.ok(html.includes("avatarSrc(settings.coachAvatar,'customCoach')"));
  assert.ok(html.includes("avatarSrc(settings.aiAvatar,'customAi')"));
- assert.ok(html.includes('function previewStudyVoiceIndex(i)'));
- assert.ok(html.includes('voiceURI=settings.voiceURI'));
+ assert.ok(html.includes('function voicePresetTuning('));
+ assert.ok(html.includes('function pickProfileVoice('));
+ assert.ok(html.includes('function previewStudyVoice()'));
+ assert.ok(html.includes('voiceProfile'));
+ const ids=vm.runInContext('VOICE_PRESETS',context);
+ assert.equal(ids.length,20);
+ assert.equal(new Set(ids).size,20);
+ for(const id of ids){
+   const tune=vm.runInContext(`voicePresetTuning('${id}')`,context);
+   assert.ok(tune.rate>.6&&tune.rate<1.2 && tune.pitch>.6&&tune.pitch<1.4,`${id} out of bounds`);
+ }
 });

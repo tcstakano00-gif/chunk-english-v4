@@ -1,4 +1,4 @@
-"""Deterministic Chromium regression suite for Chunk English v4.0.26.
+"""Deterministic Chromium regression suite for Chunk English v4.0.27.
 Actual microphone recognition on iOS needs on-device testing.
 """
 from playwright.sync_api import sync_playwright
@@ -41,7 +41,7 @@ def run():
         """
         page.set_content(ROOT.joinpath('index.html').read_text(encoding='utf-8'),wait_until='domcontentloaded')
         page.evaluate("() => {"+MOCK_SCRIPT+"}")
-        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.26')))
+        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.27')))
         check('all three modes render',lambda: [page.evaluate("(m)=>go(m)",m) for m in ['pron','example','conversation']])
         check('question and reply buttons separate',lambda: assert_true(page.locator('[data-mic-button]').count()==2))
         def speech(page_id,kind,expected):
@@ -130,10 +130,10 @@ def run():
 
         def settings():
             page.evaluate("go('settings')")
-            page.locator('select').first.select_option('1.12')
+            page.locator('select[onchange*="textScale"]').select_option('1.12')
             page.evaluate("go('pron')")
             page.evaluate("go('settings')")
-            assert page.locator('select').first.input_value()=='1.12'
+            assert page.locator('select[onchange*="textScale"]').input_value()=='1.12'
         check('settings persist across screen transitions',settings)
         def layout():
             page.evaluate("go('conversation')")
