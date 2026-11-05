@@ -1,4 +1,4 @@
-"""Deterministic Chromium regression suite for Chunk English v4.0.22.
+"""Deterministic Chromium regression suite for Chunk English v4.0.23.
 Actual microphone recognition on iOS needs on-device testing.
 """
 from playwright.sync_api import sync_playwright
@@ -41,7 +41,7 @@ def run():
         """
         page.set_content(ROOT.joinpath('index.html').read_text(encoding='utf-8'),wait_until='domcontentloaded')
         page.evaluate("() => {"+MOCK_SCRIPT+"}")
-        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.22')))
+        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.23')))
         check('all three modes render',lambda: [page.evaluate("(m)=>go(m)",m) for m in ['pron','example','conversation']])
         check('question and reply buttons separate',lambda: assert_true(page.locator('[data-mic-button]').count()==2))
         def speech(page_id,kind,expected):
@@ -84,6 +84,34 @@ def run():
             assert 'mic-active' not in other.get_attribute('class')
             page.evaluate('finishListening()')
         check('single mic activity',single)
+        def mic_banner_success():
+            page.evaluate("go('pron')")
+            assert page.locator('#microphoneLiveBanner').is_hidden()
+            page.locator('[data-mic-kind="chunk"]').click()
+            assert page.locator('#microphoneLiveBanner').is_visible()
+            assert page.locator('#microphoneLiveBanner').inner_text()=='マイクON中です。'
+            page.evaluate("window.__speechInstances.at(-1).result(target('chunk'))")
+            page.wait_for_function("state.page==='results'",timeout=2000)
+            assert page.locator('#microphoneLiveBanner').is_hidden()
+            assert page.evaluate('window.__speechInstances.at(-1).aborted')==True
+        check('mic banner and release after success',mic_banner_success)
+        def mic_banner_error():
+            page.evaluate("go('example')")
+            page.locator('[data-mic-kind="exampleQuestion"]').click()
+            assert page.locator('#microphoneLiveBanner').is_visible()
+            page.evaluate("window.__speechInstances.at(-1).error('network')")
+            assert page.locator('#microphoneLiveBanner').is_hidden()
+            assert page.evaluate('window.__speechInstances.at(-1).aborted')==True
+        check('mic banner and release on error',mic_banner_error)
+        def mic_banner_stop():
+            page.evaluate("go('conversation')")
+            page.locator('[data-mic-kind="reply"]').click()
+            assert page.locator('#microphoneLiveBanner').is_visible()
+            page.evaluate('finishListening()')
+            assert page.locator('#microphoneLiveBanner').is_hidden()
+            assert page.evaluate('window.__speechInstances.at(-1).aborted')==True
+        check('mic banner and release on manual stop',mic_banner_stop)
+
         def diag():
             data=page.evaluate('speechDiagnostics.map(x=>({event:x.event,kind:x.kind,detail:x.detail}))')
             assert len(data)>0

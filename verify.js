@@ -65,9 +65,9 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-22'));
+ assert.ok(sw.includes('chunk-english-v4-0-23'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
- assert.ok(html.includes('./sw.js?v=422'));
+ assert.ok(html.includes('./sw.js?v=423'));
 });
 console.log('v4.0.15 total passed:',pass.length,'failed:',process.exitCode||0);
 
@@ -163,3 +163,15 @@ for(const scene of ['daily','travel','shopping','restaurant']){
  });
 }
 console.log('v4.0.20 translation regression tests:',pass.length,'errors:',process.exitCode||0);
+
+// v4.0.23: indicator only for live recognition; release on successful result.
+test('v423 microphone banner is prominent and hidden by default',()=>{
+ assert.ok(html.includes('id="microphoneLiveBanner" role="status" aria-live="polite" hidden'));
+ assert.ok(html.includes('マイクON中です。'));
+ assert.ok(html.includes('font-weight:900'));
+});
+test('v423 final transcript explicitly aborts recognition before navigation',()=>{
+ assert.ok(html.includes('function closeSpeechCapture(r)'));
+ const occurrences=(html.match(/rec=null;closeSpeechCapture\(r\);audioPhase='idle';restoreMicButtonIdle\(\);/g)||[]).length;
+ assert.strictEqual(occurrences,2);
+});
