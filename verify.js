@@ -65,7 +65,7 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-27'));
+ assert.ok(sw.includes('chunk-english-v4-0-28'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
  assert.ok(html.includes('./sw.js?v=426'));
 });
@@ -198,7 +198,8 @@ console.log('v4.0.24 extended tests executed, failures:',process.exitCode||0);
 test('v425 native TTS voice selector and preview',()=>{
  assert.ok(html.includes('function englishVoices()'));
  assert.ok(html.includes('function previewStudyVoice('));
- assert.ok(html.includes('voiceURI'));
+ assert.ok(!html.includes('id="voiceBaseSelect"'));
+ assert.ok(html.includes('20音声の試作サンプルを比較する'));
  assert.ok(html.includes("speakText(target(kind))"));
 });
 test('v425 AI1 and AI2 original robot assets',()=>{
@@ -237,4 +238,19 @@ test('v427 20 profile variations, avatar independence, and tune bounds',()=>{
    const tune=vm.runInContext(`voicePresetTuning('${id}')`,context);
    assert.ok(tune.rate>.6&&tune.rate<1.2 && tune.pitch>.6&&tune.pitch<1.4,`${id} out of bounds`);
  }
+});
+
+// v4.0.28: no manual source voice; 20 local comparison samples.
+test('v428 comparison lab integrity',()=>{
+ const path=require('path');const lab=path.join(__dirname,'voice_lab');
+ const manifest=JSON.parse(fs.readFileSync(path.join(lab,'manifest.json'),'utf8'));
+ assert.equal(manifest.items.length,20);
+ const crypto=require('crypto');
+ for(const item of manifest.items){
+  const buf=fs.readFileSync(path.join(lab,item.file));
+  assert.ok(buf.length>500,'missing sound '+item.id);
+  assert.equal(crypto.createHash('sha256').update(buf).digest('hex'),item.sha256);
+ }
+ assert.ok(!html.includes('id="voiceBaseSelect"'));
+ assert.ok(html.includes('href="./voice_lab/"'));
 });

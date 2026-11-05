@@ -1,3 +1,4 @@
+v4.0.28 β：音声素材の手動選択を廃止。参考音声20件の比較ページを追加。
 # v4.0.22 β 検証方法
 
 `python quality_lab/run_suite.py` でWAV波形・JavaScript・Chromium UIテストを実行します。実行結果は `quality_lab/suite-report.json` に記録されます。

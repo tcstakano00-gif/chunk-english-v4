@@ -33,7 +33,7 @@ with sync_playwright() as p:
     assert page.locator('.study-voice-avatars img').count()==2
     assert page.locator('.voice-preset-fields select').count()==3
     assert page.evaluate('VOICE_PRESETS.length')==20
-    assert page.locator('#voiceBaseSelect option').count()==3 # auto, Samantha, Daniel
+    assert page.locator('#voiceBaseSelect').count()==0 # manual voice selector removed
     assert page.evaluate("pickProfileVoice('young-female-soft','').voice.voiceURI")=='v-samantha'
     assert page.evaluate("pickProfileVoice('mature-male-soft','').voice.voiceURI")=='v-daniel'
     observed=set()
@@ -50,18 +50,15 @@ with sync_playwright() as p:
         assert .65<=spoken['pitch']<=1.5
         observed.add((round(spoken['rate'],3),round(spoken['pitch'],3),spoken['voice']))
     assert len(observed)>=16, f'Only {len(observed)} distinct output configs'
-    # Voice preferences can be independent from avatars. Manual voice overrides automatic voice mapping.
-    page.locator('#voiceBaseSelect').select_option('v-daniel')
-    assert page.evaluate('settings.voiceURI')=='v-daniel'
+    # Voice is selected automatically and remains independent of avatar selection.
     page.evaluate("changeSetting('coachAvatar','ai1')")
-    assert page.evaluate('settings.voiceURI')=='v-daniel'
     assert page.locator('.study-voice-avatars img').first.get_attribute('src').endswith('person-ai1-v425.png')
     page.evaluate('previewStudyVoice()')
     assert page.evaluate('window.__spoken.at(-1).voice')=='v-daniel'
     page.evaluate("go('pron');go('settings')")
-    assert page.evaluate('settings.voiceURI')=='v-daniel'
+    assert page.locator('a[href="./voice_lab/"]').count()==1
     assert page.evaluate('settings.voiceProfile')=='robot-male-clear'
     assert not errs,errs
-    print(json.dumps({'result':'PASS','presets':20,'distinctConfigurations':len(observed),'manualOverride':'PASS','avatarIndependence':'PASS','screenPersistence':'PASS','browserErrors':errs},ensure_ascii=False))
+    print(json.dumps({'result':'PASS','presets':20,'distinctConfigurations':len(observed),'autoVoiceSelection':'PASS','avatarIndependence':'PASS','screenPersistence':'PASS','browserErrors':errs},ensure_ascii=False))
     browser.close()
 server.shutdown()
