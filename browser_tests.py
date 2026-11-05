@@ -1,4 +1,4 @@
-"""Deterministic Chromium regression suite for Chunk English v4.0.23.
+"""Deterministic Chromium regression suite for Chunk English v4.0.24.
 Actual microphone recognition on iOS needs on-device testing.
 """
 from playwright.sync_api import sync_playwright
@@ -32,7 +32,7 @@ def run():
             constructor(){this.lang='';this.continuous=false;this.interimResults=false;window.__speechInstances.push(this)}
             start(){this.onstart?.({})}
             stop(){this.onend?.({})}
-            abort(){this.aborted=true}
+            abort(){this.aborted=true;if(this.autoEnd!==false)this.onend?.({})}
             result(text,final=true){const r=[{transcript:text,confidence:0.94}];r.isFinal=final;this.onresult?.({results:[r]})}
             error(code){this.onerror?.({error:code})}
           }
@@ -41,7 +41,7 @@ def run():
         """
         page.set_content(ROOT.joinpath('index.html').read_text(encoding='utf-8'),wait_until='domcontentloaded')
         page.evaluate("() => {"+MOCK_SCRIPT+"}")
-        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.23')))
+        check('initial homepage',lambda: assert_true(page.locator('.app-version').inner_text().startswith('v4.0.24')))
         check('all three modes render',lambda: [page.evaluate("(m)=>go(m)",m) for m in ['pron','example','conversation']])
         check('question and reply buttons separate',lambda: assert_true(page.locator('[data-mic-button]').count()==2))
         def speech(page_id,kind,expected):
@@ -145,6 +145,62 @@ def run():
         info={}
         def capture():info.update(layout())
         check('layout inspected',capture)
+        def must_wait_for_end():
+            page.evaluate("go('pron')")
+            page.evaluate("() => {window.__speechInstances=[];listen('chunk');window.__speechInstances.at(-1).autoEnd=false}")
+            page.evaluate("() => window.__speechInstances.at(-1).result(target('chunk'))")
+            assert page.evaluate("state.page")=='pron', 'must not score while capture end is unconfirmed'
+            assert page.locator('#microphoneLiveBanner').is_visible()
+            page.evaluate("() => window.__speechInstances.at(-1).onend({})")
+            assert page.evaluate("state.page")=='results'
+            assert page.locator('#microphoneLiveBanner').is_hidden()
+        check('do not score before onend and score after confirmation',must_wait_for_end)
+        def repeat100():
+            page.evaluate("go('pron')")
+            summary=page.evaluate("""() => {let successes=0;
+              for(let i=0;i<100;i++){
+               go('pron');listen('chunk');
+               const r=window.__speechInstances.at(-1);
+               r.result(target('chunk'));
+               if(state.page!=='results'||rec!==null)throw Error('session '+i+' not closed');
+               successes++;
+              }
+              return successes;
+            }""")
+            assert summary==100
+        check('100 consecutive simulated final-result sessions',repeat100)
+        def avatar_combo_ui():
+            result=page.evaluate("""() => {
+             const ids=AVATAR_IDS;
+             const before=JSON.stringify(settings);
+             let attempts=0;
+             for(const coach of ids)for(const ai of ids)for(const you of ids){
+              settings.coachAvatar=coach;settings.aiAvatar=ai;settings.youAvatar=you;
+              if(!avatarSrc(coach,'customCoach')||!avatarSrc(ai,'customAi')||!avatarSrc(you,'customYou'))throw Error('invalid src');
+              attempts++;
+             }
+             for(const prop of ['coachAvatar','aiAvatar','youAvatar'])for(const choice of ids){
+              settings[prop]=choice;go('conversation');
+              const avatar=document.querySelector('.v4-qa .avatar.bot');
+              if(!avatar)throw Error('AI example avatar missing');
+              const image=getComputedStyle(avatar).backgroundImage;
+              if(!image||image==='none')throw Error('missing CSS avatar '+prop+choice);
+             }
+             settings=JSON.parse(before);go('home');
+             return attempts;
+            }""")
+            assert result==3375
+        check('3375 avatar combos plus 45 rendered role changes',avatar_combo_ui)
+        def nonconfirm():
+            page.evaluate("go('pron')")
+            page.evaluate("() => {listen('chunk');window.__speechInstances.at(-1).autoEnd=false}")
+            page.evaluate("() => window.__speechInstances.at(-1).result(target('chunk'))")
+            page.wait_for_timeout(5450)
+            assert page.evaluate("state.page")=='pron'
+            assert '終了を確認できません' in page.locator('#voiceNote').inner_text()
+            assert page.locator('#microphoneLiveBanner').is_visible()
+            assert 'マイク停止未確認' in page.locator('#microphoneLiveBanner').inner_text()
+        check('unconfirmed onend raises warning instead of false success',nonconfirm)
         check('no uncaught browser errors',lambda: assert_true(not errors,'; '.join(errors)))
         browser.close()
     server.shutdown()

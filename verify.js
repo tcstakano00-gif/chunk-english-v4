@@ -11,9 +11,9 @@ const cases=[['chunk','pron'],['exampleQuestion','example'],['example','example'
 for(const [kind,page] of cases){test('result '+kind,()=>{vm.runInContext(`state.page='results';state.latest={kind:${JSON.stringify(kind)},target:'Sounds good.',heard:'Sounds good.',score:100,feedback:'良いです',date:'today'};render()`,context);assert.ok(el('app').innerHTML.includes('result-card'));assert.strictEqual(vm.runInContext(`resultReturnPage(${JSON.stringify(kind)})`,context),page)})}
 for(const page of ['home','pron','example','conversation','list','history','settings'])test('page '+page,()=>{vm.runInContext(`state.page=${JSON.stringify(page)};render()`,context);assert.ok(el('app').innerHTML.length>100)});
 // Fake Web Speech final event, test navigation and cancel for all supported areas.
-win.SpeechRecognition=class{constructor(){win.__rec=this} start(){this.onstart?.()}abort(){} stop(){this.onend?.()}};
+win.SpeechRecognition=class{constructor(){win.__rec=this} start(){this.onstart?.()}abort(){this.aborted=true;this.onend?.()} stop(){this.onend?.()}};
 for(const [kind,page] of [['chunk','pron'],['exampleQuestion','example'],['example','example'],['question','conversation'],['aiReply','conversation']]){
-test('speech success '+kind,()=>{vm.runInContext(`state.page=${JSON.stringify(page)};render();listen(${JSON.stringify(kind)})`,context);const r=win.__rec;const target=vm.runInContext(`target(${JSON.stringify(kind)})`,context);const item=[{transcript:target}];item.isFinal=true;r.onresult({results:[item]});r.onend();assert.strictEqual(vm.runInContext('state.page',context),'results');assert.ok(el('app').innerHTML.includes('result-card'))});
+test('speech success '+kind,()=>{vm.runInContext(`state.page=${JSON.stringify(page)};render();listen(${JSON.stringify(kind)})`,context);const r=win.__rec;const target=vm.runInContext(`target(${JSON.stringify(kind)})`,context);const item=[{transcript:target}];item.isFinal=true;r.onresult({results:[item]});r.onend?.();assert.strictEqual(vm.runInContext('state.page',context),'results');assert.ok(el('app').innerHTML.includes('result-card'))});
 test('manual cancel '+kind,()=>{vm.runInContext(`state.page=${JSON.stringify(page)};render();listen(${JSON.stringify(kind)});finishListening()`,context);assert.strictEqual(vm.runInContext('state.page',context),page)})
 }
 // Static navigation geometry invariants (CSS variables and safe-area retained).
@@ -65,9 +65,9 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-23'));
+ assert.ok(sw.includes('chunk-english-v4-0-24'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
- assert.ok(html.includes('./sw.js?v=423'));
+ assert.ok(html.includes('./sw.js?v=424'));
 });
 console.log('v4.0.15 total passed:',pass.length,'failed:',process.exitCode||0);
 
@@ -107,7 +107,7 @@ for(const error of ['network','audio-capture','no-speech','not-allowed','aborted
 test('v418 normal success restores microphone',()=>{
  vm.runInContext("state.page='pron';render();listen('chunk')",context);
  const r=win.__rec;const item=[{transcript:'Sounds good.'}];item.isFinal=true;
- r.onresult({results:[item]});r.onend();
+ r.onresult({results:[item]});r.onend?.();
  assert.strictEqual(micButton.disabled,false);
  assert.strictEqual(activeState,false);
 });
@@ -170,8 +170,27 @@ test('v423 microphone banner is prominent and hidden by default',()=>{
  assert.ok(html.includes('マイクON中です。'));
  assert.ok(html.includes('font-weight:900'));
 });
-test('v423 final transcript explicitly aborts recognition before navigation',()=>{
- assert.ok(html.includes('function closeSpeechCapture(r)'));
- const occurrences=(html.match(/rec=null;closeSpeechCapture\(r\);audioPhase='idle';restoreMicButtonIdle\(\);/g)||[]).length;
- assert.strictEqual(occurrences,2);
+test('v424 successful results require end confirmation',()=>{
+ assert.ok(html.includes('if(!valid()||!endedConfirmed)return'));
+ assert.ok(html.includes("if(endedConfirmed)finishResult();else requestFinish(true)"));
+ assert.ok(html.includes('end-unconfirmed'));
 });
+test('v424 100 successive speech recognition sessions',()=>{
+ for(let i=0;i<100;i++){
+  vm.runInContext("state.page='pron';render();listen('chunk')",context);
+  const r=win.__rec;
+  const word=vm.runInContext("target('chunk')",context);
+  const record=[{transcript:word}];record.isFinal=true;
+  r.onresult({results:[record]});
+  assert.strictEqual(vm.runInContext('state.page',context),'results','run '+i);
+  assert.strictEqual(vm.runInContext('rec===null',context),true);
+ }
+});
+test('v424 15 by 15 by 15 avatar selection combinations',()=>{
+ const summary=vm.runInContext(`(()=>{let count=0;for(const coach of AVATAR_IDS)for(const ai of AVATAR_IDS)for(const you of AVATAR_IDS){
+  const a=avatarSrc(coach,'customCoach'),b=avatarSrc(ai,'customAi'),c=avatarSrc(you,'customYou');
+  if(!a||!b||!c)throw Error('empty avatar URL');count++;
+ }return count})()`,context);
+ assert.strictEqual(summary,3375);
+});
+console.log('v4.0.24 extended tests executed, failures:',process.exitCode||0);

@@ -446,7 +446,7 @@ function beginReview(){
  state.lastReviewId=selected.id;state.id=selected.id;state.variant=0;state.answer=0;
  go('pron');
 }
-function render(){let x=item(),v=selected();let out='';if(state.page==='home'){out=`${header('ホーム')}<div class="hero card"><div style="flex:1;min-width:0"><div class="app-title-line"><h1>チャンク英会話</h1><span class="app-version" aria-label="アプリバージョン">v4.0.23 β</span></div><p>チャンクとは、会話でよく使う短い言葉のまとまりです。まとめて覚えると、自然に英語が話しやすくなります。</p></div><div class="people"><div class="person coach" aria-label="AIコーチ"></div><div class="person learner" aria-label="学習者"></div></div></div><div class="modes"><button class="mode" onclick="go('pron')"><span class="mode-icon">🎙</span><span><b>発音で学習</b><small>チャンクを聞いて発音練習</small></span><span class="go">›</span></button><button class="mode green" onclick="go('example')"><span class="mode-icon">▤</span><span><b>例文で学習</b><small>同じ表現を例文で練習</small></span><span class="go">›</span></button><button class="mode orange" onclick="go('conversation')"><span class="mode-icon">☏</span><span><b>AI会話で学習</b><small>引き継いだ表現で会話練習</small></span><span class="go">›</span></button></div><div class="card review-entry"><div class="review-head"><b>苦手チャンクの復習</b><span class="tiny">低スコア・未復習を優先</span></div><button class="btn green full" onclick="beginReview()">↻ おすすめチャンクを練習</button><div class="tiny review-legend">未学習 → 練習中 → 習得済み（85%以上を別の日に2回）</div></div><div class="subgrid"><div class="mini-card"><span class="label">現在のチャンク</span><div style="font-weight:800">No.${x.id}</div><div style="font-size:16px;font-weight:800;margin-top:4px">${esc(x.en)}</div><div class="tiny">${esc(x.ja)}</div></div><div class="mini-card"><span class="label">選択中の例文</span><div style="font-size:14px;font-weight:800">${esc(v[0])}</div><div class="tiny">${esc(v[1])}</div></div></div><div class="card"><button class="btn outline full" onclick="go('list')">学習するチャンクを変更</button><details class="notice-toggle"><summary>現在利用できる機能について</summary><div class="notice">3モード・読み上げ・通常発音チェックを利用できます。録音・聞き比べは一時停止中です。録音を用いたAI精密採点とAI自由会話には別のサーバーが必要です。</div></details></div>`}
+function render(){let x=item(),v=selected();let out='';if(state.page==='home'){out=`${header('ホーム')}<div class="hero card"><div style="flex:1;min-width:0"><div class="app-title-line"><h1>チャンク英会話</h1><span class="app-version" aria-label="アプリバージョン">v4.0.24 β</span></div><p>チャンクとは、会話でよく使う短い言葉のまとまりです。まとめて覚えると、自然に英語が話しやすくなります。</p></div><div class="people"><div class="person coach" aria-label="AIコーチ"></div><div class="person learner" aria-label="学習者"></div></div></div><div class="modes"><button class="mode" onclick="go('pron')"><span class="mode-icon">🎙</span><span><b>発音で学習</b><small>チャンクを聞いて発音練習</small></span><span class="go">›</span></button><button class="mode green" onclick="go('example')"><span class="mode-icon">▤</span><span><b>例文で学習</b><small>同じ表現を例文で練習</small></span><span class="go">›</span></button><button class="mode orange" onclick="go('conversation')"><span class="mode-icon">☏</span><span><b>AI会話で学習</b><small>引き継いだ表現で会話練習</small></span><span class="go">›</span></button></div><div class="card review-entry"><div class="review-head"><b>苦手チャンクの復習</b><span class="tiny">低スコア・未復習を優先</span></div><button class="btn green full" onclick="beginReview()">↻ おすすめチャンクを練習</button><div class="tiny review-legend">未学習 → 練習中 → 習得済み（85%以上を別の日に2回）</div></div><div class="subgrid"><div class="mini-card"><span class="label">現在のチャンク</span><div style="font-weight:800">No.${x.id}</div><div style="font-size:16px;font-weight:800;margin-top:4px">${esc(x.en)}</div><div class="tiny">${esc(x.ja)}</div></div><div class="mini-card"><span class="label">選択中の例文</span><div style="font-size:14px;font-weight:800">${esc(v[0])}</div><div class="tiny">${esc(v[1])}</div></div></div><div class="card"><button class="btn outline full" onclick="go('list')">学習するチャンクを変更</button><details class="notice-toggle"><summary>現在利用できる機能について</summary><div class="notice">3モード・読み上げ・通常発音チェックを利用できます。録音・聞き比べは一時停止中です。録音を用いたAI精密採点とAI自由会話には別のサーバーが必要です。</div></details></div>`}
 else if(state.page==='pron'){out=header('発音で学習')+nav()+`<div class="card v4-screen v4-pron"><div class="compactMeta"><div class="step">チャンク ${CHUNKS.findIndex(c=>c.id===x.id)+1} / ${CHUNKS.length}</div><div class="pill">発音集中</div></div><div class="v4-chunk">${contentBox(x.en,x.ja)}</div><div class="v4-primary"><button class="btn gray" onclick="speak('chunk')"><span class="avatar teacher btn-avatar" aria-hidden="true"></span><span>お手本</span></button><button class="btn" data-mic-button data-mic-kind="chunk" onclick="listen('chunk')"><span class="avatar student btn-avatar" aria-hidden="true"></span><span class="mic-button-label">発音する</span></button></div><div class="v4-secondary"><button class="btn outline" onclick="go('results')">👤 発音コーチ・採点</button><button class="btn outline" onclick="finishListening()">■ マイク停止</button></div><div id="voiceNote" class="tiny voice-inline" aria-live="polite"></div><div id="transcript" class="tiny" aria-live="polite"></div>${state.latest?`<button class="btn outline full" onclick="go('results')">採点・添削を見る</button>`:''}<p class="tiny">選択中のチャンクは例文学習・AI会話にも引き継がれます。</p>${linkBar()}</div>`}
 else if(state.page==='example'){let qa=examplePair(x);out=header('例文で学習')+nav()+`<div class="card v4-screen"><div class="v4-meta"><span>チャンク：<b>${esc(x.en)}</b></span><span>例文 ${state.variant+1} / ${examples(x).length}</span></div>${qaCard('質問',qa.question,'exampleQuestion')}${qaCard('回答',qa.answer,'example')}<div class="v4-switch"><button class="btn outline compact" onclick="chooseAnswerForExample(-1)">‹ 前の例文</button><button class="btn gray compact" onclick="chooseAnswerForExample(1)">次の例文 ›</button></div><details class="v4-choices"><summary>登録済みの回答例を一覧から選ぶ</summary><div class="list exlist">${examples(x).map((a,i)=>`<button class="choice ${i===state.variant?'selected':''}" onclick="chooseRegisteredVariant(${i})">${esc(a[0])}<small>${esc(a[1])}</small></button>`).join('')}</div></details><div id="voiceNote" class="tiny voice-inline" aria-live="polite"></div><div id="transcript" class="tiny"></div>${state.latest?`<button class="btn outline full" onclick="go('results')">採点・添削を見る</button>`:''}${linkBar()}</div>`}
 else if(state.page==='conversation'){let qa=conversationPair(x);out=header('AI会話で学習')+nav()+`<div class="card v4-screen"><div class="v4-meta"><span>チャンク：<b>${esc(x.en)}</b></span><span>質問・回答練習</span></div>${sceneChooser()}<p class="tiny v4-ai-note">シーンに応じた定型文による試作です。AI生成は未接続のため、チャンクとシーンが合わない場合があります。</p>${qaCard('質問',qa.question,'question',true)}${qaCard('回答例',qa.answer,'reply',true)}<div class="v4-switch"><button class="btn gray compact" onclick="chooseAnswer((state.answer+1)%scenario(item()).choices.length)">別の回答例</button><button class="btn outline compact" onclick="go('results')">発音コーチ・採点</button></div><div id="voiceNote" class="tiny voice-inline" aria-live="polite"></div><div id="transcript" class="tiny"></div>${state.latest?`<button class="btn outline full" onclick="go('results')">採点・添削を見る</button>`:''}${linkBar()}</div>`}
@@ -466,7 +466,7 @@ else if(state.page==='settings'){
  ${avatarOptions(prop,key)}<input type="file" accept="image/*" aria-label="${label}の画像を選択" onchange="uploadAvatar('${key}',this)"></div>`).join('')}
  ${licensedImageControls()}
  <button class="btn outline full" style="margin-top:12px" onclick="settings={...DEFAULT_SETTINGS};saveSettings();applySettings();render()">設定を初期値に戻す</button>
- <h2 style="margin-top:16px">音声認識の診断</h2><p class="tiny">診断ファイルには開始・終了・エラーの種類だけを記録します。音声や認識された英文は保存しません。アプリを閉じると履歴は消去されます。</p><button class="btn outline full" onclick="downloadSpeechDiagnostics()">音声診断ログを保存（JSON）</button><h2 style="margin-top:16px">バックアップ・復元</h2><button class="btn gray full" onclick="downloadBackup()">学習履歴・設定を保存（JSON）</button><label>バックアップから復元</label><input type="file" accept="application/json,.json" onchange="restoreBackup(this)"><p class="tiny">復元すると現在の記録・設定は置き換わります。</p><h2 style="margin-top:16px">チャンク拡張（最大1,000件）</h2><p class="tiny">現在の100チャンクに加え、英語・日本語・例文のJSON配列を読み込めます。既存データは維持します。</p><input type="file" accept="application/json,.json" onchange="importExtraChunks(this)"><p class="tiny">形式例：[ { "en": "Good morning.", "ja": "おはよう", "example": "Good morning, everyone.", "exampleJa": "皆さん、おはようございます" } ]</p><p class="tiny">設定はこの端末のブラウザ内に保存されます。学習履歴は初期化しません。</p>
+ <h2 style="margin-top:16px">自動品質診断（マイク不要）</h2><p class="tiny">チャンク100件・4シーンの和訳形式、採点演算100回、人物画像の選択3,375通りを、この端末内で検査します。実マイク・iOSのマイク解放は検証できません。</p><button class="btn green full" onclick="runLocalQualitySelfTest()">自動診断を開始</button><div id="localQualityResult" role="status" aria-live="polite" class="tiny" style="margin-top:8px"></div><button class="btn outline full" onclick="downloadLocalQualityReport()" style="margin-top:6px">診断結果を保存（JSON）</button> <h2 style="margin-top:16px">音声認識の診断</h2><p class="tiny">診断ファイルには開始・終了・エラーの種類だけを記録します。音声や認識された英文は保存しません。アプリを閉じると履歴は消去されます。</p><button class="btn outline full" onclick="downloadSpeechDiagnostics()">音声診断ログを保存（JSON）</button><h2 style="margin-top:16px">バックアップ・復元</h2><button class="btn gray full" onclick="downloadBackup()">学習履歴・設定を保存（JSON）</button><label>バックアップから復元</label><input type="file" accept="application/json,.json" onchange="restoreBackup(this)"><p class="tiny">復元すると現在の記録・設定は置き換わります。</p><h2 style="margin-top:16px">チャンク拡張（最大1,000件）</h2><p class="tiny">現在の100チャンクに加え、英語・日本語・例文のJSON配列を読み込めます。既存データは維持します。</p><input type="file" accept="application/json,.json" onchange="importExtraChunks(this)"><p class="tiny">形式例：[ { "en": "Good morning.", "ja": "おはよう", "example": "Good morning, everyone.", "exampleJa": "皆さん、おはようございます" } ]</p><p class="tiny">設定はこの端末のブラウザ内に保存されます。学習履歴は初期化しません。</p>
  </div>`;
 }
 else if(state.page==='list'){out=header('チャンク辞書')+`<div class="card dict-card"><div class="dict-switch"><button id="dictEn" class="dict-toggle" onclick="setDictionaryMode('en')">英和（A〜Z）</button><button id="dictJa" class="dict-toggle" onclick="setDictionaryMode('ja')">和英（50音）</button></div><input id="search" placeholder="英語・日本語で検索" oninput="filterList(this.value)"><div class="dict-layout"><div class="list dict-list" id="chunkList"></div><div class="dict-index" id="dictIndex" aria-label="索引"></div></div><p class="tiny">単語をタップすると、そのチャンクの発音練習を開きます。</p></div>`}
@@ -784,17 +784,23 @@ function target(kind){let x=item(),v=selected(),s=scenario(x);return kind==='chu
 let activeMicKind=null;
 // SpeechRecognition does not expose the physical iOS microphone LED state.
 // Display only while this app considers speech capture active.
-function setMicrophoneLiveBanner(active){
+function setMicrophoneLiveBanner(active,unconfirmed=false){
+ // iOS's orange system indicator cannot be read via Web APIs. This banner
+ // tracks our recognition session; an unacknowledged end is shown explicitly.
  const banner=document.getElementById('microphoneLiveBanner');
- if(banner)banner.hidden=!active;
+ if(banner){
+  banner.hidden=!active;
+  banner.textContent=unconfirmed?'マイク停止未確認です。iPhoneのオレンジ表示をご確認ください。':'マイクON中です。';
+  banner.setAttribute('data-session-state',!active?'off':unconfirmed?'unconfirmed':'active');
+ }
  document.body?.classList.toggle('mic-session-active',!!active);
 }
-function closeSpeechCapture(r){
+function closeSpeechCapture(r,endedConfirmed=false){
  // Safari can deliver a final transcript before onend. Explicitly release the
  // recognition session rather than only detaching callbacks and navigating.
  if(!r)return;
  r.onresult=null;r.onerror=null;r.onend=null;r.onstart=null;r.onspeechstart=null;r.onspeechend=null;
- try{r.abort()}catch(_e){try{r.stop()}catch(_ignored){}}
+ if(!endedConfirmed)try{r.abort()}catch(_e){try{r.stop()}catch(_ignored){}}
 }
 function setMicIndicator(active,kind=activeMicKind){
  if(active&&kind)activeMicKind=kind;
@@ -833,8 +839,41 @@ function speechDiag(event,kind='',detail=''){
  speechDiagnostics.push({time:new Date().toISOString(),event:String(event).slice(0,60),kind:String(kind).slice(0,24),detail:String(detail).slice(0,60)});
  if(speechDiagnostics.length>SPEECH_DIAG_LIMIT)speechDiagnostics.shift();
 }
+// Non-invasive, on-device checks. No microphone, no history mutation and no upload.
+let lastLocalQualityReport=null;
+function runLocalQualitySelfTest(){
+ const tests=[];
+ function check(name,fn){try{const count=fn();tests.push({name,count,ok:true})}catch(e){tests.push({name,ok:false,error:String(e?.message||e).slice(0,200)})}}
+ check('100チャンクの基本データ',()=>{let n=0;for(const c of CHUNKS.slice(0,100)){if(!c.en||!c.ja||!c.example||!c.exampleJa)throw Error('チャンク '+c.id+' の登録が不完全');n++}return n});
+ check('100チャンク×4シーンの和訳形式',()=>{let n=0;for(const scene of ['daily','travel','shopping','restaurant'])for(const c of CHUNKS.slice(0,100)){
+  const [en,ja]=sceneChunkAnswer(c,scene);
+  if(!en||!ja||(!en.includes('～')&&ja.includes('～')))throw Error('チャンク '+c.id+' / '+scene);
+  n++;
+ }return n});
+ check('採点アルゴリズム100回',()=>{let n=0;for(const c of CHUNKS.slice(0,100)){if(similarity(c.en,c.en)!==100)throw Error('自己一致失敗 '+c.id);n++}return n});
+ check('人物設定の組み合わせ',()=>{let n=0;for(const coach of AVATAR_IDS)for(const ai of AVATAR_IDS)for(const you of AVATAR_IDS){
+  if(!avatarSrc(coach,'customCoach')||!avatarSrc(ai,'customAi')||!avatarSrc(you,'customYou'))throw Error('画像未解決');n++;
+ }return n});
+ check('質問・回答の発音ボタンの区別',()=>{
+  let n=0;for(const [kind1,kind2] of [['exampleQuestion','example'],['question','reply']]){
+   const htmlA=qaCard('質問',['Sounds good.','いいですね'],kind1,kind1==='question');
+   const htmlB=qaCard('回答',['Sounds good.','いいですね'],kind2,kind2==='reply');
+   if(!htmlA.includes('data-mic-kind="'+kind1+'"')||!htmlB.includes('data-mic-kind="'+kind2+'"'))throw Error('音声ボタンの識別が不正');n++;
+  }return n;
+ });
+ lastLocalQualityReport={version:'v4.0.24',runAt:new Date().toISOString(),scope:'データ・採点演算・画像参照の模擬検査。実マイク、認識エンジン、実際の画面表示、和訳の意味品質は対象外。',tests};
+ const passed=tests.filter(t=>t.ok).length;
+ const result=document.getElementById('localQualityResult');
+ if(result){result.textContent='自動診断：'+passed+'/'+tests.length+'項目合格。'+(passed===tests.length?'すべて正常です。':'異常があります。')+'（実マイクは未検証）';result.classList.toggle('is-error',passed!==tests.length)}
+ return lastLocalQualityReport;
+}
+function downloadLocalQualityReport(){
+ if(!lastLocalQualityReport)runLocalQualitySelfTest();
+ const blob=new Blob([JSON.stringify(lastLocalQualityReport,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='chunk-english-local-quality-v424.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
 function downloadSpeechDiagnostics(){
- const safe={version:'v4.0.23',description:'音声イベントの診断情報のみ（発話音声・認識英文は含みません）',events:speechDiagnostics};
+ const safe={version:'v4.0.24',description:'音声イベントの診断情報のみ（発話音声・認識英文は含みません）',events:speechDiagnostics};
  const blob=new Blob([JSON.stringify(safe,null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='chunk-english-speech-diagnostics.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
@@ -904,7 +943,7 @@ function resetSpeechRecognition(){
 }
 function listen(kind){
  speechDiag('start-request',kind);
- // v4.0.7: WebKitでonresultの後にonendが届かない場合でも最終結果を採点へ送る。
+ // v4.0.24: 最終結果から採点へ進む前にonendを待つ。未確認時は警告する。
  if(audioPhase==='preparing'||audioPhase==='listening')return;
  resetSpeechRecognition();clearStatusTimer();recognitionHasAudio=false;state.latest=null;state.recognitionError='';
  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -912,25 +951,42 @@ function listen(kind){
  const r=new R(),session=++recognitionSession;
  activeMicKind=kind;
  rec=r;r.lang='en-US';r.continuous=false;r.interimResults=false;
- let heard='',started=false,completed=false,finalTimer=null,silenceTimer=null,speechDetected=false,ending=false;
+ let heard='',started=false,completed=false,finalTimer=null,silenceTimer=null,speechDetected=false,ending=false,endedConfirmed=false;
  // Safariは実際に発話していても認識テキストが遅れて届くことがある。
  // 開始直後の5秒タイマーでabort()することはしない。
- const SILENCE_MS=5000, STARTUP_GRACE_MS=12000, RESULT_FLUSH_MS=1800;
+ const SILENCE_MS=5000, STARTUP_GRACE_MS=12000, RESULT_FLUSH_MS=1800, END_WATCHDOG_MS=3500;
  function clearSilenceTimer(){if(silenceTimer){clearTimeout(silenceTimer);silenceTimer=null}}
  function armSilenceTimer(ms){
   clearSilenceTimer();silenceTimer=setTimeout(()=>{
    if(!valid())return;
    // 無音判定でもabort()はせずstop()で最終結果を受け取る。
-   if(heard){finishResult();return}
+   if(heard){requestFinish(true);return}
    requestFinish();
   },ms);
  }
- function requestFinish(){
-  if(!valid()||ending)return;
-  speechDiag('request-finish',kind);
+ function requestFinish(finalTranscript=false){
+  if(!valid())return;
+  if(ending){
+   if(finalTranscript&&!endedConfirmed){try{r.abort()}catch(_e){}}
+   return;
+  }
+  speechDiag('request-finish',kind,finalTranscript?'final-abort':'silence-stop');
   ending=true;clearSilenceTimer();
-  try{r.stop()}catch(e){ /* onendが来なくても下の猶予時間で復帰 */ }
-  finalTimer=setTimeout(()=>{if(valid())finishResult()},RESULT_FLUSH_MS);
+  // A final transcript is already stored. abort() releases the capture without
+  // waiting for more speech. Do not detach onend before iOS has acknowledged it.
+  try{if(finalTranscript)r.abort();else r.stop()}catch(e){speechDiag('finish-command-failed',kind,String(e?.name||'unknown'))}
+  // Safari may fail to deliver onend. Never mark a session as released merely
+  // because a timeout elapsed; report that physical release is unconfirmed.
+  if(!completed&&!endedConfirmed){
+   finalTimer=setTimeout(()=>{
+    if(!valid()||endedConfirmed)return;
+    speechDiag('end-watchdog',kind);
+    try{r.abort()}catch(_e){}
+    finalTimer=setTimeout(()=>{
+     if(valid()&&!endedConfirmed)showError('マイクの終了を確認できませんでした。iPhoneのマイク表示を確認し、必要ならアプリを閉じて再起動してください。','end-unconfirmed');
+    },1800);
+   },END_WATCHDOG_MS);
+  }
  }
  function valid(){return rec===r&&session===recognitionSession&&!completed}
  function clearTimers(){
@@ -939,8 +995,8 @@ function listen(kind){
   if(recognitionTimeout){clearTimeout(recognitionTimeout);recognitionTimeout=null}
  }
  function finishResult(){
-  if(!valid())return;
-  completed=true;clearTimers();rec=null;closeSpeechCapture(r);audioPhase='idle';restoreMicButtonIdle();
+  if(!valid()||!endedConfirmed)return;
+  completed=true;clearTimers();rec=null;closeSpeechCapture(r,true);audioPhase='idle';restoreMicButtonIdle();
   if(!heard){
    speechDiag('no-transcript',kind);
    temporaryVoiceNote('聞き取れませんでした',true,3000);
@@ -957,7 +1013,9 @@ function listen(kind){
  function showError(message,errorCode='error'){
   if(!valid())return;
   speechDiag('error',kind,errorCode);
+  const endIsUnconfirmed=errorCode==='end-unconfirmed'&&!endedConfirmed;
   completed=true;clearTimers();rec=null;closeSpeechCapture(r);audioPhase='idle';restoreMicButtonIdle();
+  if(endIsUnconfirmed)setMicrophoneLiveBanner(true,true);
   state.recognitionError=message;
   // 中断・無音はエラー画面に送らない。
   temporaryVoiceNote(message,true,4500);
@@ -979,16 +1037,18 @@ function listen(kind){
   if(heard)clearSilenceTimer();
   if($('transcript'))$('transcript').textContent='認識中：'+heard;
   if(heard&&hasFinal){
-   // 通常はonendで確定。Safariで欠落する場合も500ms後に採点へ進む。
-   if(finalTimer)clearTimeout(finalTimer);
-   finalTimer=setTimeout(()=>finishResult(),500);
+   // Final transcript: request capture release before changing screens.
+   if(endedConfirmed)finishResult();else requestFinish(true);
   }
  };
  r.onerror=e=>{
   if(!valid())return;
   const code=String(e.error||'unknown');
   // 最終認識結果が取れている場合の後続エラーでは採点を優先。
-  if(heard&&['no-speech','aborted'].includes(code)){finishResult();return}
+  if(heard&&['no-speech','aborted'].includes(code)){
+   // abort() can raise 'aborted' before onend; wait for onend acknowledgment.
+   if(!ending)requestFinish(true);return;
+  }
   const messages={
    'not-allowed':'Safariで音声認識が許可されていません。アドレスバーのサイト設定をご確認ください。',
    'service-not-allowed':'Safariの音声認識サービスを開始できません。',
@@ -999,16 +1059,18 @@ function listen(kind){
    'language-not-supported':'音声認識言語が利用できません。'};
   showError(messages[code]||'音声認識エラー：'+code,code);
  };
- r.onend=()=>{if(!valid())return;speechDiag('ended',kind);if(heard){finishResult();return}
-  // iOSでは音声の終了通知より最終認識結果が遅れるケースがある。
-  if(finalTimer)clearTimeout(finalTimer);finalTimer=setTimeout(()=>{if(valid())finishResult()},RESULT_FLUSH_MS);
+ r.onend=()=>{if(!valid())return;endedConfirmed=true;speechDiag('ended',kind);
+  if(finalTimer){clearTimeout(finalTimer);finalTimer=null}
+  if(heard){finishResult();return}
+  // An onend may precede a delayed result. Allow its final result to flush.
+  finalTimer=setTimeout(()=>{if(valid())finishResult()},RESULT_FLUSH_MS);
  };
  try{
   r.start();
   recognitionTimeout=setTimeout(()=>{
    if(!valid())return;
    if(!started){showError('音声認識が開始しませんでした。Safariのマイク権限・通信状態を確認してください。');return}
-   if(heard){finishResult();return}
+   if(heard){requestFinish(true);return}
    requestFinish();
   },18000);
  }catch(e){showError('音声認識を開始できませんでした：'+e.message+'。再度お試しください。')}
@@ -1040,5 +1102,5 @@ async function aiAssess(kind){
 async function wav16k(pcm,rate){let length=Math.max(1,Math.ceil(pcm.length*16000/rate)),offline=new OfflineAudioContext(1,length,16000);let original=offline.createBuffer(1,pcm.length,rate);original.copyToChannel(pcm,0);let src=offline.createBufferSource();src.buffer=original;src.connect(offline.destination);src.start();let normalized=(await offline.startRendering()).getChannelData(0);let out=new ArrayBuffer(44+normalized.length*2),v=new DataView(out);function put(at,str){for(let i=0;i<str.length;i++)v.setUint8(at+i,str.charCodeAt(i))}put(0,'RIFF');v.setUint32(4,36+normalized.length*2,true);put(8,'WAVE');put(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);put(36,'data');v.setUint32(40,normalized.length*2,true);for(let i=0;i<normalized.length;i++){let n=Math.max(-1,Math.min(1,normalized[i]));v.setInt16(44+i*2,n<0?n*32768:n*32767,true)}return out}
 function aiResultsHTML(){const a=state.aiLatest;if(!a)return '<div class="card">AI採点結果がありません。</div>';let escs=esc;let metric=[['発音の正確さ',a.accuracy],['流暢さ',a.fluency],['抑揚・強弱',a.prosody],['文章の完全性',a.completeness]].filter(x=>x[1]!=null);let details=metric.map(([name,value])=>`<div>${escs(name)}<b>${Math.round(value)}</b></div>`).join('');let words=(a.words||[]).map(w=>`<span class="wordgrade ${w.accuracy<75?'low':''}">${escs(w.word)} ${Math.round(w.accuracy)}</span>`).join('');let weaker=[...(a.words||[])].filter(w=>w.accuracy<80).sort((a,b)=>a.accuracy-b.accuracy).slice(0,2);let tip=weaker.length?'特に「'+weaker.map(w=>w.word).join('」「')+'」を、お手本と聞き比べてゆっくり言い直しましょう。':'お手本と聞き比べ、単語のつながりと文全体の強弱も練習しましょう。';return header('AI発音採点')+nav()+`<div class="card"><div class="section">Azure Speechによる発音評価</div>${contentBox(a.target,'')}<div class="score">${Math.round(a.overall)} / 100</div><div class="aigrid">${details}</div><div class="section">単語別の評価</div>${words||'単語別データなし'}<div class="notice">${escs(tip)}</div><p class="tiny">音声は採点のためAzureに送信されます。端末にはスコアだけを保存します。</p><button class="btn blue full" onclick="go('${resultReturnPage(a.kind)}')">↶ 同じ英文をもう一度練習</button>${linkBar()}</div>`}
 
-if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('./sw.js?v=423',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});render();
+if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('./sw.js?v=424',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});render();
 </script></body></html>
