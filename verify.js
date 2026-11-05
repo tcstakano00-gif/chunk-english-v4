@@ -65,9 +65,9 @@ for(const id of ['realai1','realai2','japanmale','japanfemale','foreignmale','fo
 }
 test('v415 SW cache isolated and refreshed',()=>{
  const sw=fs.readFileSync(require('path').join(__dirname,'sw.js'),'utf8');
- assert.ok(sw.includes('chunk-english-v4-0-25'));
+ assert.ok(sw.includes('chunk-english-v4-0-26'));
  assert.ok(sw.includes("x.startsWith(CACHE_PREFIX)"));
- assert.ok(html.includes('./sw.js?v=425'));
+ assert.ok(html.includes('./sw.js?v=426'));
 });
 console.log('v4.0.15 total passed:',pass.length,'failed:',process.exitCode||0);
 
@@ -197,7 +197,7 @@ console.log('v4.0.24 extended tests executed, failures:',process.exitCode||0);
 // v4.0.25: new user-facing features without changing the speech-session implementation.
 test('v425 native TTS voice selector and preview',()=>{
  assert.ok(html.includes('function englishVoices()'));
- assert.ok(html.includes('function previewStudyVoice()'));
+ assert.ok(html.includes('function previewStudyVoice('));
  assert.ok(html.includes('voiceURI'));
  assert.ok(html.includes("speakText(target(kind))"));
 });
@@ -219,3 +219,16 @@ test('v425 reply-context adjustments',()=>{
  }
 });
 console.log('v4.0.25 features verified');
+
+// v4.0.26: selected avatars displayed independently from the curated voice choices.
+test('v426 capped curated distinct voice candidates and avatars',()=>{
+ assert.ok(html.includes('function studyVoiceCandidates()'));
+ assert.ok(html.includes('chosen.slice(0,5)'));
+ assert.ok(html.includes('used.has(v.voiceURI)'));
+ assert.ok(html.includes('VOICE_EXCLUDE'));
+ assert.ok(html.includes('study-voice-avatars'));
+ assert.ok(html.includes("avatarSrc(settings.coachAvatar,'customCoach')"));
+ assert.ok(html.includes("avatarSrc(settings.aiAvatar,'customAi')"));
+ assert.ok(html.includes('function previewStudyVoiceIndex(i)'));
+ assert.ok(html.includes('voiceURI=settings.voiceURI'));
+});
